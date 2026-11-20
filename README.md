@@ -1,5 +1,9 @@
 # AssetGuard: A Centralized Incident Management System for Laboratory Infrastructure
 
+## Live Demo
+* **Vercel Web Demo:** [https://assetguard-pbcst304-web-demo.vercel.app](https://assetguard-pbcst304-web-demo.vercel.app)
+
+  
 **Course:** PBCST304 – Object Oriented Programming (KTU B.Tech CSE, Semester 3)  
 **Institution:** Marian Engineering College, Thiruvananthapuram  
 **Project Guide:** Ms. Vijaya Lekshmi S V, Assistant Professor, Dept. of CSE  
