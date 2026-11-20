@@ -1,0 +1,801 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AssetGuard - Centralized Incident Management System (PBCST304)</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+            font-size: 13px;
+        }
+        body {
+            background-color: #1e293b;
+            margin: 0;
+            padding: 15px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+        }
+        .jframe-window {
+            width: 100%;
+            max-width: 1160px;
+            background-color: #eeeeee;
+            border: 2px solid #888;
+            border-radius: 6px;
+            box-shadow: 0 12px 35px rgba(0,0,0,0.5);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+        .title-bar {
+            background: linear-gradient(to right, #1e3a8a, #2563eb);
+            color: white;
+            padding: 8px 14px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-weight: bold;
+            user-select: none;
+        }
+        .title-bar-left {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .java-badge {
+            background: #e76f00;
+            color: white;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-size: 11px;
+        }
+        .window-controls span {
+            display: inline-block;
+            width: 24px;
+            height: 20px;
+            line-height: 18px;
+            text-align: center;
+            background: rgba(255,255,255,0.2);
+            margin-left: 4px;
+            border-radius: 2px;
+        }
+        .role-switcher-bar {
+            background: #dcdcdc;
+            border-bottom: 2px solid #999;
+            padding: 8px 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        .role-tabs {
+            display: flex;
+            gap: 8px;
+        }
+        .role-tab {
+            padding: 8px 16px;
+            border: 1px solid #7a8a99;
+            background: #e8e8e8;
+            cursor: pointer;
+            font-weight: bold;
+            border-radius: 4px;
+            color: #333;
+            transition: 0.15s;
+        }
+        .role-tab.active-user {
+            background: #2563eb;
+            color: white;
+            border-color: #1d4ed8;
+        }
+        .role-tab.active-admin {
+            background: #b91c1c;
+            color: white;
+            border-color: #991b1b;
+        }
+        .session-badge {
+            font-weight: bold;
+            color: #1e3a8a;
+            background: #e0f2fe;
+            border: 1px solid #7dd3fc;
+            padding: 5px 12px;
+            border-radius: 4px;
+        }
+        .kpi-panel {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 15px;
+            padding: 12px 15px 6px 15px;
+        }
+        .kpi-card {
+            padding: 12px;
+            color: white;
+            text-align: center;
+            border-radius: 3px;
+            box-shadow: inset 0 0 0 1px rgba(0,0,0,0.15);
+        }
+        .kpi-card .title {
+            font-weight: bold;
+            font-size: 12px;
+            margin-bottom: 4px;
+        }
+        .kpi-card .value {
+            font-weight: bold;
+            font-size: 24px;
+        }
+        .bg-blue { background-color: rgb(41, 128, 185); }
+        .bg-red { background-color: rgb(192, 57, 43); }
+        .bg-orange { background-color: rgb(211, 84, 0); }
+        .bg-green { background-color: rgb(39, 174, 96); }
+
+        .screen-container {
+            padding: 12px 15px 15px 15px;
+            display: none;
+        }
+        .screen-container.active {
+            display: block;
+        }
+        .user-grid {
+            display: grid;
+            grid-template-columns: 380px 1fr;
+            gap: 15px;
+        }
+        @media (max-width: 900px) {
+            .user-grid { grid-template-columns: 1fr; }
+            .kpi-panel { grid-template-columns: repeat(2, 1fr); }
+        }
+        fieldset.titled-border {
+            border: 1px solid #a0a0a0;
+            background: #f7f7f7;
+            padding: 14px;
+            margin: 0;
+        }
+        fieldset.titled-border legend {
+            font-weight: bold;
+            color: #1e3a8a;
+            padding: 0 6px;
+        }
+        .form-group {
+            margin-bottom: 10px;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 4px;
+            color: #222;
+            font-weight: 600;
+        }
+        input[type="text"], input[type="password"], select, textarea {
+            width: 100%;
+            padding: 7px 8px;
+            border: 1px solid #7a8a99;
+            background: #fff;
+            outline: none;
+        }
+        .jbutton {
+            background: linear-gradient(to bottom, #ffffff, #e1e5ea);
+            border: 1px solid #7a8a99;
+            padding: 8px 14px;
+            font-weight: bold;
+            color: #111;
+            cursor: pointer;
+            border-radius: 2px;
+        }
+        .jbutton:hover {
+            background: linear-gradient(to bottom, #eef4fb, #cfe0f5);
+            border-color: #3b6ea5;
+        }
+        .jbutton-primary {
+            background: linear-gradient(to bottom, #2563eb, #1d4ed8);
+            color: white;
+            border-color: #1e3a8a;
+        }
+        .jbutton-primary:hover {
+            background: #1e40af;
+            color: white;
+        }
+        .btn-full {
+            width: 100%;
+            margin-top: 6px;
+        }
+        .filter-bar {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 10px;
+            background: #e6e6e6;
+            padding: 8px 12px;
+            border: 1px solid #bbb;
+            margin-bottom: 10px;
+        }
+        .filter-bar select, .filter-bar input {
+            width: auto;
+            min-width: 130px;
+        }
+        .table-scroll {
+            border: 1px solid #7a8a99;
+            background: white;
+            height: 310px;
+            overflow-y: auto;
+        }
+        table.jtable {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        table.jtable th {
+            background: linear-gradient(to bottom, #f2f2f2, #dcdcdc);
+            border: 1px solid #a0a0a0;
+            padding: 7px 8px;
+            text-align: left;
+            position: sticky;
+            top: 0;
+            font-weight: bold;
+        }
+        table.jtable td {
+            border: 1px solid #dcdcdc;
+            padding: 7px 8px;
+            cursor: pointer;
+        }
+        table.jtable tr:hover {
+            background-color: #eef5fc;
+        }
+        table.jtable tr.selected {
+            background-color: #b8cfe5 !important;
+            font-weight: 600;
+        }
+        .badge {
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-size: 11px;
+            font-weight: bold;
+        }
+        .sev-CRITICAL { background: #fde8e8; color: #b91c1c; border: 1px solid #f8b4b4; }
+        .sev-HIGH { background: #ffedd5; color: #c2410c; border: 1px solid #fdba74; }
+        .sev-MEDIUM { background: #fef9c3; color: #854d0e; border: 1px solid #fde047; }
+        .sev-LOW { background: #e0f2fe; color: #0369a1; border: 1px solid #7dd3fc; }
+
+        .st-OPEN { color: #c0392b; font-weight: bold; }
+        .st-IN_PROGRESS { color: #d35400; font-weight: bold; }
+        .st-RESOLVED { color: #27ae60; font-weight: bold; }
+
+        .admin-action-box {
+            margin-top: 10px;
+            background: #fff8f6;
+            border: 1px solid #e0b4b4;
+            padding: 10px 12px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            align-items: center;
+        }
+        .terminal-box {
+            width: 100%;
+            max-width: 1160px;
+            margin-top: 12px;
+            background: #0f172a;
+            color: #10b981;
+            border: 1px solid #334155;
+            border-radius: 5px;
+            padding: 10px 14px;
+            font-family: Consolas, monospace;
+            font-size: 12px;
+            height: 115px;
+            overflow-y: auto;
+        }
+        .terminal-line {
+            margin: 2px 0;
+            font-family: Consolas, monospace;
+        }
+    </style>
+</head>
+<body>
+
+<div class="jframe-window">
+    <div class="title-bar">
+        <div class="title-bar-left">
+            <span class="java-badge">JAVA SWING MVC</span>
+            <span>AssetGuard - Centralized Incident Management System (PBCST304) | Marian Engineering College</span>
+        </div>
+        <div class="window-controls">
+            <span>_</span>
+            <span>□</span>
+            <span>✕</span>
+        </div>
+    </div>
+
+    <div class="role-switcher-bar">
+        <div class="role-tabs">
+            <button id="tabUserBtn" class="role-tab active-user" onclick="switchScreen('USER')">
+                Student / Faculty Fault Reporter Screen
+            </button>
+            <button id="tabAdminBtn" class="role-tab" onclick="switchScreen('ADMIN')">
+                Lab Administrator Resolution Dashboard
+            </button>
+        </div>
+        <div class="session-badge" id="lblCurrentRole">
+            Active Screen: Student / Faculty Reporter (Role: REPORTER)
+        </div>
+    </div>
+
+    <div class="kpi-panel">
+        <div class="kpi-card bg-blue">
+            <div class="title">TOTAL LAB INCIDENTS</div>
+            <div class="value" id="lblTotalCount">0</div>
+        </div>
+        <div class="kpi-card bg-red">
+            <div class="title">OPEN FAULTS</div>
+            <div class="value" id="lblOpenCount">0</div>
+        </div>
+        <div class="kpi-card bg-orange">
+            <div class="title">IN PROGRESS REPAIRS</div>
+            <div class="value" id="lblProgressCount">0</div>
+        </div>
+        <div class="kpi-card bg-green">
+            <div class="title">RESOLVED ISSUES</div>
+            <div class="value" id="lblResolvedCount">0</div>
+        </div>
+    </div>
+
+    <!-- SCREEN 1: STUDENT / FACULTY REPORTER SCREEN -->
+    <div id="userScreen" class="screen-container active">
+        <div class="user-grid">
+            <fieldset class="titled-border">
+                <legend>Report Faulty Laboratory Material / Equipment</legend>
+                <div class="form-group">
+                    <label>Student / Faculty Reporter (users table):</label>
+                    <select id="cmbReporter" onchange="refreshAllViews()">
+                        <option value="hrishikesh">hrishikesh (Hrishikesh B - MCE25CS084)</option>
+                        <option value="kanishk">kanishk (Kanishk Nair - MCE25CS092)</option>
+                        <option value="athul">athul (Athul G S Nair - MCE25CS057)</option>
+                        <option value="savanth">savanth (Savanth R S - MCE25CS150)</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Select Lab Equipment / Asset ID (assets table):</label>
+                    <select id="cmbAssetId"></select>
+                </div>
+                <div class="form-group">
+                    <label>Fault Category:</label>
+                    <select id="cmbCategory">
+                        <option value="Boot Failure / No Display">Boot Failure / No Display</option>
+                        <option value="Defective Microcontroller IC">Defective Microcontroller IC</option>
+                        <option value="Packet Loss / Switch Fault">Packet Loss / Switch Fault</option>
+                        <option value="Peripheral Fault">Peripheral Fault (Keyboard/Mouse)</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Urgency / Severity Level:</label>
+                    <select id="cmbSeverity">
+                        <option value="LOW">LOW (Minor issue)</option>
+                        <option value="MEDIUM">MEDIUM (Single kit/peripheral affected)</option>
+                        <option value="HIGH" selected>HIGH (Workstation unusable)</option>
+                        <option value="CRITICAL">CRITICAL (Entire lab / network switch down)</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Detailed Fault Description:</label>
+                    <textarea id="txtDescription" rows="4" placeholder="Describe the hardware, microcontroller, or network fault clearly..."></textarea>
+                </div>
+                <button class="jbutton jbutton-primary btn-full" onclick="handleCreateIncident()">
+                    Submit Equipment Fault Report
+                </button>
+            </fieldset>
+
+            <fieldset class="titled-border">
+                <legend>Live Lab Equipment Fault Status Tracker (Read-Only View for Students)</legend>
+                <div class="filter-bar">
+                    <label><strong>View Mode:</strong></label>
+                    <select id="cmbUserViewMode" onchange="refreshAllViews()">
+                        <option value="ALL_LAB">All Reported Lab Faults</option>
+                        <option value="MY_REPORTS">Only My Submitted Reports</option>
+                    </select>
+                    <span style="margin-left:auto; color:#555; font-size:12px;">
+                        Students can track when the Lab Admin marks their reported equipment as RESOLVED.
+                    </span>
+                </div>
+                <div class="table-scroll">
+                    <table class="jtable">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Asset ID</th>
+                                <th>Reported By</th>
+                                <th>Issue Category</th>
+                                <th>Severity</th>
+                                <th>Repair Status</th>
+                                <th>Technician Remarks</th>
+                                <th>Reported At</th>
+                            </tr>
+                        </thead>
+                        <tbody id="userTableBody"></tbody>
+                    </table>
+                </div>
+            </fieldset>
+        </div>
+    </div>
+
+    <!-- SCREEN 2: LAB ADMINISTRATOR RESOLUTION SCREEN -->
+    <div id="adminScreen" class="screen-container">
+        <fieldset class="titled-border">
+            <legend>Centralized Administrator Maintenance &amp; Resolution Console (User: admin_mec)</legend>
+
+            <div class="filter-bar">
+                <label><strong>Filter Status:</strong></label>
+                <select id="cmbFilterStatus" onchange="refreshAllViews()">
+                    <option value="ALL">ALL</option>
+                    <option value="OPEN">OPEN</option>
+                    <option value="IN_PROGRESS">IN_PROGRESS</option>
+                    <option value="RESOLVED">RESOLVED</option>
+                </select>
+
+                <label><strong>Filter Severity:</strong></label>
+                <select id="cmbFilterSeverity" onchange="refreshAllViews()">
+                    <option value="ALL">ALL</option>
+                    <option value="LOW">LOW</option>
+                    <option value="MEDIUM">MEDIUM</option>
+                    <option value="HIGH">HIGH</option>
+                    <option value="CRITICAL">CRITICAL</option>
+                </select>
+
+                <button class="jbutton" onclick="registerNewAssetPrompt()">+ Add New Lab Asset to Inventory</button>
+                <button class="jbutton" style="margin-left:auto;" onclick="resetDemoDatabase()">Reset Default SQLite Data</button>
+            </div>
+
+            <div class="table-scroll" style="height: 255px;">
+                <table class="jtable">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Asset ID</th>
+                            <th>Reporter</th>
+                            <th>Category</th>
+                            <th>Fault Description</th>
+                            <th>Severity</th>
+                            <th>Status</th>
+                            <th>Admin Remarks</th>
+                            <th>Reported At</th>
+                        </tr>
+                    </thead>
+                    <tbody id="adminTableBody"></tbody>
+                </table>
+            </div>
+
+            <div class="admin-action-box">
+                <strong>Selected Incident: <span id="lblSelectedId" style="color:#b91c1c;">None (Click a row above)</span></strong>
+                <label style="margin-left: 10px;"><strong>Set New Status:</strong></label>
+                <select id="cmbAdminNewStatus" style="width: 150px;">
+                    <option value="OPEN">OPEN</option>
+                    <option value="IN_PROGRESS" selected>IN_PROGRESS</option>
+                    <option value="RESOLVED">RESOLVED</option>
+                </select>
+                <label><strong>Technician Remarks:</strong></label>
+                <input type="text" id="txtAdminRemarks" style="width: 260px;" placeholder="e.g., Replaced SMPS / Checked IC">
+                <button class="jbutton jbutton-primary" onclick="handleAdminUpdate()">Update Incident</button>
+                <button class="jbutton" onclick="handleDeleteIncident()">Delete</button>
+            </div>
+        </fieldset>
+    </div>
+</div>
+
+<div class="terminal-box" id="consoleBox">
+    <div class="terminal-line">[INFO] Loading SQLite JDBC Driver (org.sqlite.JDBC)...</div>
+    <div class="terminal-line">[INFO] Connected to database: jdbc:sqlite:assetguard.db (PRAGMA foreign_keys = ON)</div>
+    <div class="terminal-line">[INFO] Verified tables: [users (5 rows), assets (4 rows), incidents (4 rows)].</div>
+</div>
+
+<script>
+    const INCIDENTS_KEY = "assetguard_incidents_v2";
+    const ASSETS_KEY = "assetguard_assets_v2";
+    let selectedIncidentId = null;
+    let isAdminUnlocked = false;
+
+    const defaultAssets = [
+        { id: "CSLAB1-PC12", label: "CSLAB1-PC12 (Dell OptiPlex 7090 - CSE Lab 1)" },
+        { id: "MP-ARD-08", label: "MP-ARD-08 (Arduino Uno R3 Kit #08 - Embedded Lab)" },
+        { id: "NET-SW-02", label: "NET-SW-02 (Cisco 24-Port Switch - Network Lab)" },
+        { id: "CSLAB2-KB05", label: "CSLAB2-KB05 (Logitech USB Keyboard #05 - CSE Lab 2)" }
+    ];
+
+    const initialSeedIncidents = [
+        {
+            incidentId: 1,
+            assetId: "CSLAB1-PC12",
+            reportedBy: "hrishikesh",
+            issueCategory: "Boot Failure / No Display",
+            description: "No display on monitor, power LED blinks amber.",
+            severity: "HIGH",
+            status: "IN_PROGRESS",
+            adminRemarks: "SMPS replacement ordered",
+            reportedAt: "2026-10-12 09:45:10"
+        },
+        {
+            incidentId: 2,
+            assetId: "MP-ARD-08",
+            reportedBy: "kanishk",
+            issueCategory: "Defective Microcontroller IC",
+            description: "ATmega328P IC heating up and not uploading sketch.",
+            severity: "MEDIUM",
+            status: "OPEN",
+            adminRemarks: "Pending review",
+            reportedAt: "2026-10-12 11:20:05"
+        },
+        {
+            incidentId: 3,
+            assetId: "NET-SW-02",
+            reportedBy: "athul",
+            issueCategory: "Packet Loss / Switch Fault",
+            description: "Packet loss on Ports 1-8 in Network Lab.",
+            severity: "CRITICAL",
+            status: "RESOLVED",
+            adminRemarks: "Crimped new RJ45 uplink & reset switch",
+            reportedAt: "2026-10-13 14:15:42"
+        },
+        {
+            incidentId: 4,
+            assetId: "CSLAB2-KB05",
+            reportedBy: "savanth",
+            issueCategory: "Peripheral Fault",
+            description: "Spacebar and Enter keys unresponsive.",
+            severity: "LOW",
+            status: "OPEN",
+            adminRemarks: "Pending review",
+            reportedAt: "2026-10-14 10:05:19"
+        }
+    ];
+
+    function getAssets() {
+        const raw = localStorage.getItem(ASSETS_KEY);
+        if (!raw) {
+            localStorage.setItem(ASSETS_KEY, JSON.stringify(defaultAssets));
+            return [...defaultAssets];
+        }
+        return JSON.parse(raw);
+    }
+
+    function getIncidents() {
+        const raw = localStorage.getItem(INCIDENTS_KEY);
+        if (!raw) {
+            localStorage.setItem(INCIDENTS_KEY, JSON.stringify(initialSeedIncidents));
+            return [...initialSeedIncidents];
+        }
+        return JSON.parse(raw);
+    }
+
+    function saveIncidents(list) {
+        localStorage.setItem(INCIDENTS_KEY, JSON.stringify(list));
+    }
+
+    function logToConsole(msg) {
+        const box = document.getElementById("consoleBox");
+        const now = new Date().toISOString().replace("T", " ").substring(0, 19);
+        const line = document.createElement("div");
+        line.className = "terminal-line";
+        line.textContent = `[JDBC ${now}] ${msg}`;
+        box.appendChild(line);
+        box.scrollTop = box.scrollHeight;
+    }
+
+    function switchScreen(mode) {
+        if (mode === "ADMIN" && !isAdminUnlocked) {
+            const pwd = prompt("Admin Login Required (users table: admin_mec)\nEnter Admin Password (default: admin123):", "admin123");
+            if (pwd !== "admin123") {
+                alert("Access Denied: Invalid Administrator Password!");
+                return;
+            }
+            isAdminUnlocked = true;
+            logToConsole("AUTH SUCCESS: User 'admin_mec' authenticated with role 'ADMIN'");
+        }
+
+        const userScreen = document.getElementById("userScreen");
+        const adminScreen = document.getElementById("adminScreen");
+        const tabUserBtn = document.getElementById("tabUserBtn");
+        const tabAdminBtn = document.getElementById("tabAdminBtn");
+        const lblRole = document.getElementById("lblCurrentRole");
+
+        if (mode === "USER") {
+            userScreen.classList.add("active");
+            adminScreen.classList.remove("active");
+            tabUserBtn.className = "role-tab active-user";
+            tabAdminBtn.className = "role-tab";
+            lblRole.textContent = "Active Screen: Student / Faculty Reporter (Role: REPORTER)";
+        } else {
+            userScreen.classList.remove("active");
+            adminScreen.classList.add("active");
+            tabUserBtn.className = "role-tab";
+            tabAdminBtn.className = "role-tab active-admin";
+            lblRole.textContent = "Active Screen: Lab Administrator Console (User: admin_mec | Role: ADMIN)";
+        }
+        refreshAllViews();
+    }
+
+    function populateAssetsDropdown() {
+        const assets = getAssets();
+        const select = document.getElementById("cmbAssetId");
+        select.innerHTML = "";
+        assets.forEach(a => {
+            const opt = document.createElement("option");
+            opt.value = a.id;
+            opt.textContent = a.label;
+            select.appendChild(opt);
+        });
+    }
+
+    function refreshAllViews() {
+        const all = getIncidents();
+
+        let open = 0, progress = 0, resolved = 0;
+        all.forEach(i => {
+            if (i.status === "OPEN") open++;
+            else if (i.status === "IN_PROGRESS") progress++;
+            else if (i.status === "RESOLVED") resolved++;
+        });
+        document.getElementById("lblTotalCount").textContent = all.length;
+        document.getElementById("lblOpenCount").textContent = open;
+        document.getElementById("lblProgressCount").textContent = progress;
+        document.getElementById("lblResolvedCount").textContent = resolved;
+
+        const userViewMode = document.getElementById("cmbUserViewMode").value;
+        const currentReporter = document.getElementById("cmbReporter").value;
+        const userList = all.filter(i => userViewMode === "ALL_LAB" || i.reportedBy === currentReporter)
+                            .sort((a, b) => b.incidentId - a.incidentId);
+
+        const userTbody = document.getElementById("userTableBody");
+        userTbody.innerHTML = "";
+        userList.forEach(i => {
+            const tr = document.createElement("tr");
+            tr.innerHTML = `
+                <td>#${i.incidentId}</td>
+                <td><strong>${i.assetId}</strong></td>
+                <td>${i.reportedBy}</td>
+                <td>${i.issueCategory}</td>
+                <td><span class="badge sev-${i.severity}">${i.severity}</span></td>
+                <td class="st-${i.status}">${i.status}</td>
+                <td>${i.adminRemarks}</td>
+                <td>${i.reportedAt}</td>
+            `;
+            userTbody.appendChild(tr);
+        });
+
+        const statusFilter = document.getElementById("cmbFilterStatus").value;
+        const sevFilter = document.getElementById("cmbFilterSeverity").value;
+        const adminList = all.filter(i => {
+            const matchSt = (statusFilter === "ALL" || i.status === statusFilter);
+            const matchSev = (sevFilter === "ALL" || i.severity === sevFilter);
+            return matchSt && matchSev;
+        }).sort((a, b) => b.incidentId - a.incidentId);
+
+        const adminTbody = document.getElementById("adminTableBody");
+        adminTbody.innerHTML = "";
+        adminList.forEach(i => {
+            const tr = document.createElement("tr");
+            if (i.incidentId === selectedIncidentId) tr.classList.add("selected");
+            tr.onclick = () => {
+                selectedIncidentId = i.incidentId;
+                document.getElementById("lblSelectedId").textContent = `#${i.incidentId} (${i.assetId})`;
+                document.getElementById("cmbAdminNewStatus").value = i.status;
+                document.getElementById("txtAdminRemarks").value = i.adminRemarks;
+                refreshAllViews();
+            };
+            tr.innerHTML = `
+                <td>#${i.incidentId}</td>
+                <td><strong>${i.assetId}</strong></td>
+                <td>${i.reportedBy}</td>
+                <td>${i.issueCategory}</td>
+                <td>${i.description}</td>
+                <td><span class="badge sev-${i.severity}">${i.severity}</span></td>
+                <td class="st-${i.status}">${i.status}</td>
+                <td>${i.adminRemarks}</td>
+                <td>${i.reportedAt}</td>
+            `;
+            adminTbody.appendChild(tr);
+        });
+    }
+
+    function handleCreateIncident() {
+        const assetId = document.getElementById("cmbAssetId").value;
+        const reportedBy = document.getElementById("cmbReporter").value;
+        const issueCategory = document.getElementById("cmbCategory").value;
+        const severity = document.getElementById("cmbSeverity").value;
+        const description = document.getElementById("txtDescription").value.trim();
+
+        if (!description) {
+            alert("JOptionPane Warning: Please enter a clear fault description.");
+            return;
+        }
+
+        const list = getIncidents();
+        const nextId = list.length > 0 ? Math.max(...list.map(x => x.incidentId)) + 1 : 1;
+        const timestamp = new Date().toISOString().replace("T", " ").substring(0, 19);
+
+        const newInc = {
+            incidentId: nextId,
+            assetId,
+            reportedBy,
+            issueCategory,
+            description,
+            severity,
+            status: "OPEN",
+            adminRemarks: "Pending review",
+            reportedAt: timestamp
+        };
+
+        list.push(newInc);
+        saveIncidents(list);
+
+        document.getElementById("txtDescription").value = "";
+        logToConsole(`INSERT INTO incidents (asset_id, reported_by, severity, status) VALUES ('${assetId}', '${reportedBy}', '${severity}', 'OPEN')`);
+        refreshAllViews();
+        alert(`Incident #${nextId} reported by '${reportedBy}' logged successfully! It is now visible in the Lab Administrator queue.`);
+    }
+
+    function handleAdminUpdate() {
+        if (!selectedIncidentId) {
+            alert("Please click on an incident row in the table above first.");
+            return;
+        }
+        const newStatus = document.getElementById("cmbAdminNewStatus").value;
+        const remarks = document.getElementById("txtAdminRemarks").value.trim() || "Updated by Lab Admin";
+
+        const list = getIncidents();
+        const item = list.find(x => x.incidentId === selectedIncidentId);
+        if (item) {
+            item.status = newStatus;
+            item.adminRemarks = remarks;
+            saveIncidents(list);
+            logToConsole(`UPDATE incidents SET status='${newStatus}', admin_remarks='${remarks}' WHERE incident_id=${selectedIncidentId}`);
+            refreshAllViews();
+            alert(`Incident #${selectedIncidentId} updated to ${newStatus}!`);
+        }
+    }
+
+    function handleDeleteIncident() {
+        if (!selectedIncidentId) {
+            alert("Select an incident from the table first.");
+            return;
+        }
+        if (confirm(`Delete Incident #${selectedIncidentId} permanently?`)) {
+            const list = getIncidents().filter(x => x.incidentId !== selectedIncidentId);
+            saveIncidents(list);
+            logToConsole(`DELETE FROM incidents WHERE incident_id=${selectedIncidentId}`);
+            selectedIncidentId = null;
+            document.getElementById("lblSelectedId").textContent = "None (Click a row above)";
+            refreshAllViews();
+        }
+    }
+
+    function registerNewAssetPrompt() {
+        const tag = prompt("Enter New Lab Asset ID (e.g., CSLAB1-PC20):");
+        if (!tag) return;
+        const cleanTag = tag.trim().toUpperCase();
+        const assets = getAssets();
+        if (assets.some(a => a.id === cleanTag)) {
+            alert("SQLite UNIQUE Constraint Error: Asset ID '" + cleanTag + "' already exists!");
+            return;
+        }
+        const desc = prompt("Enter Equipment Name & Lab Location:", "HP ProDesk 400 - CSE Lab 1");
+        assets.push({ id: cleanTag, label: `${cleanTag} (${desc || "Lab Asset"})` });
+        localStorage.setItem(ASSETS_KEY, JSON.stringify(assets));
+        populateAssetsDropdown();
+        logToConsole(`INSERT INTO assets (asset_id, asset_name) VALUES ('${cleanTag}', '${desc}')`);
+        alert(`Asset '${cleanTag}' added to inventory! Students can now report faults against it.`);
+    }
+
+    function resetDemoDatabase() {
+        localStorage.setItem(INCIDENTS_KEY, JSON.stringify(initialSeedIncidents));
+        localStorage.setItem(ASSETS_KEY, JSON.stringify(defaultAssets));
+        selectedIncidentId = null;
+        populateAssetsDropdown();
+        refreshAllViews();
+        logToConsole("DATABASE RESET: Restored initial 4 Marian Engineering College records.");
+    }
+
+    window.onload = () => {
+        populateAssetsDropdown();
+        refreshAllViews();
+    };
+</script>
+
+</body>
+</html>
