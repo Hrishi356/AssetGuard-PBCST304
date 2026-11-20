@@ -9,10 +9,10 @@
 **Project Guide:** Ms. Vijaya Lekshmi S V, Assistant Professor, Dept. of CSE  
 
 ## Team Members
-* **Hrishikesh B** (`MCE25CS084`)
-* **Kanishk Nair** (`MCE25CS092`)
-* **Athul G S Nair** (`MCE25CS057`)
-* **Savanth R S** (`MCE25CS150`)
+* **Hrishikesh B** 
+* **Kanishk Nair**
+* **Athul G S Nair** 
+* **Savanth R S** 
 
 ## Tech Stack & Architecture
 * **Language:** Core Java (JDK 17+)
